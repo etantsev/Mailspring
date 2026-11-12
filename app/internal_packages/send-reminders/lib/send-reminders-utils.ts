@@ -2,8 +2,6 @@ import {
   Thread,
   Message,
   Actions,
-  localized,
-  FeatureUsageStore,
   SyncbackMetadataTask,
   DraftEditingSession,
 } from 'mailspring-exports';
@@ -20,26 +18,6 @@ export function reminderDateFor(draftOrThread: Thread | Message | null) {
     draftOrThread.metadataForPluginId(PLUGIN_ID) ||
     {}) as Record<string, unknown>;
   return meta.expiration as Date | undefined;
-}
-
-async function incrementMetadataUse(model: Thread | Message, expiration: Date | null) {
-  if (reminderDateFor(model)) {
-    return true;
-  }
-  try {
-    await FeatureUsageStore.markUsedOrUpgrade(PLUGIN_ID, {
-      headerText: localized('All Reminders Used'),
-      rechargeText: `${localized(
-        `You can add reminders to %1$@ emails each %2$@ with Mailspring Basic.`
-      )} ${localized('Upgrade to Pro today!')}`,
-      iconUrl: 'mailspring://send-reminders/assets/ic-send-reminders-modal@2x.png',
-    });
-  } catch (error) {
-    if (error instanceof FeatureUsageStore.NoProAccessError) {
-      return false;
-    }
-  }
-  return true;
 }
 
 function assertMetadataShape(value: Record<string, unknown>) {
@@ -61,15 +39,11 @@ function assertMetadataShape(value: Record<string, unknown>) {
   }
 }
 
-export async function updateReminderMetadata(
+export function updateReminderMetadata(
   thread: Thread,
   metadataValue: Record<string, unknown>
 ) {
   assertMetadataShape(metadataValue);
-
-  if (!(await incrementMetadataUse(thread, metadataValue.expiration as Date | null))) {
-    return;
-  }
   Actions.queueTask(
     SyncbackMetadataTask.forSaving({
       model: thread,
@@ -79,17 +53,11 @@ export async function updateReminderMetadata(
   );
 }
 
-export async function updateDraftReminderMetadata(
+export function updateDraftReminderMetadata(
   draftSession: DraftEditingSession,
   metadataValue: Record<string, unknown>
 ) {
   assertMetadataShape(metadataValue);
-
-  if (
-    !(await incrementMetadataUse(draftSession.draft(), metadataValue.expiration as Date | null))
-  ) {
-    return;
-  }
   draftSession.changes.add({ pristine: false });
   // Write using THREAD_PLUGIN_ID so the sync engine automatically promotes
   // this metadata to the thread when the draft is sent — no client-side

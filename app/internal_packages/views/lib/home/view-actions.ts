@@ -6,7 +6,6 @@ import { removeThumbnail } from './thumbnails';
 import { forgetView } from '../consent';
 import { setPinned } from '../nav/pins';
 import { clearBadge } from '../nav/badges';
-import { AgentSessionStore } from '../agent/store';
 
 export function openViewsHome() {
   ViewsNavStore.showHome();
@@ -14,13 +13,12 @@ export function openViewsHome() {
 
 /**
  * Deletes everything this computer keeps for a View: its files and checkpoints, thumbnail,
- * pin, badge, approvals, credentials, agent bookkeeping and its webview's own storage. Its
+ * pin, badge, approvals, credentials and its webview's own storage. Its
  * metadata (`view:<id>`) stays on the user's threads and expires under the server's retention
  * policy, so removing a View never rewrites mail.
  */
 export function purgeView(viewId: string) {
   if (ViewsNavStore.viewId() === viewId) openViewsHome();
-  AgentSessionStore.forget(viewId);
   deleteViewFiles(viewId);
   removeThumbnail(viewId);
   setPinned(viewId, false);

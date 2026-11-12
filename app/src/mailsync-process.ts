@@ -11,7 +11,7 @@ import { EventEmitter } from 'events';
 import fs from 'fs';
 import { localized } from './intl';
 import { developerToolsAvailable } from './developer-tools';
-import { IIdentity, Account } from 'mailspring-exports';
+import { Account } from 'mailspring-exports';
 
 import {
   GMAIL_CLIENT_ID,
@@ -141,7 +141,6 @@ export class MailsyncProcess extends EventEmitter {
 
   // these must be set before you use the process
   account: Account = null;
-  identity: IIdentity = null;
 
   verbose: boolean;
   resourcePath: string;
@@ -215,10 +214,6 @@ export class MailsyncProcess extends EventEmitter {
       GMAIL_CLIENT_SECRET: GMAIL_CLIENT_SECRET,
       IDENTITY_SERVER: 'unknown',
     });
-    if (process.type === 'renderer') {
-      const rootURLForServer = require('./flux/mailspring-api-request').rootURLForServer;
-      env.IDENTITY_SERVER = rootURLForServer('identity');
-    }
 
     const args = [`--mode`, mode];
     if (this.verbose) {
@@ -243,7 +238,8 @@ export class MailsyncProcess extends EventEmitter {
     if (this.account && this._proc.stdout) {
       this._proc.stdout.once('data', () => {
         const rs = new Readable();
-        rs.push(`${JSON.stringify(this.account)}\n${JSON.stringify(this.identity)}\n`);
+        // mailsync reads the account and then an identity line; `null` runs it without one.
+        rs.push(`${JSON.stringify(this.account)}\nnull\n`);
         rs.push(null);
         rs.pipe(this._proc.stdin, { end: false });
       });

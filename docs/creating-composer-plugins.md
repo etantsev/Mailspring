@@ -31,7 +31,7 @@ This guide covers how to build plugins that extend the Mailspring composer — t
   - [Marks for Transient State](#marks-for-transient-state)
   - [Registering Your Editor Plugin](#registering-your-editor-plugin)
 - [Complete Examples](#complete-examples)
-  - [Example 1: Simple Composer Action Button (Translation)](#example-1-simple-composer-action-button-translation)
+  - [Example 1: Simple Composer Action Button](#example-1-simple-composer-action-button)
   - [Example 2: Full Composer Plugin with Editor Extension (Templates)](#example-2-full-composer-plugin-with-editor-extension-templates)
   - [Example 3: Inline Autocomplete with Floating UI (Emoji)](#example-3-inline-autocomplete-with-floating-ui-emoji)
 - [Key Imports Reference](#key-imports-reference)
@@ -148,7 +148,7 @@ The composer renders `InjectedComponentSet` elements at specific named slots cal
 
 | Role | Location | Description |
 |------|----------|-------------|
-| `Composer:ActionButton` | Toolbar above the editor | Buttons like Translate, Templates, Send Later |
+| `Composer:ActionButton` | Toolbar above the editor | Buttons like Templates, Send Later |
 | `Composer:Footer` | Below the editor body | Status bars, informational messages |
 | `Composer:ActionBarWorkspace` | Below the action bar | Extended workspace area |
 | `Composer:FromFieldComponents` | In the "From" row | Signature picker, account-related UI |
@@ -840,39 +840,38 @@ export const schema = {
 
 ## Complete Examples
 
-### Example 1: Simple Composer Action Button (Translation)
+### Example 1: Simple Composer Action Button
 
-The translation plugin adds a toolbar button that opens a language picker popover and replaces the draft body with a translated version.
-
-**Key files**: `app/internal_packages/translation/`
+A toolbar button that opens a menu of snippets and appends the chosen one to the draft body. This is the smallest useful composer plugin: one registered component and one draft change.
 
 ```typescript
 // main.tsx — Lifecycle
 export function activate() {
-  ComponentRegistry.register(TranslateComposerButton, {
+  ComponentRegistry.register(SnippetComposerButton, {
     role: 'Composer:ActionButton',
   });
 }
 
 export function deactivate() {
-  ComponentRegistry.unregister(TranslateComposerButton);
+  ComponentRegistry.unregister(SnippetComposerButton);
 }
 ```
 
 ```typescript
 // composer-button.tsx — The button component
-export class TranslateComposerButton extends React.Component<{
+const SNIPPETS = ['Thanks!', 'Talk soon,', 'Let me know if you have any questions.'];
+
+export class SnippetComposerButton extends React.Component<{
   draft: Message;
   session: DraftEditingSession;
 }> {
-  static displayName = 'TranslateComposerButton';
+  static displayName = 'SnippetComposerButton';
 
-  _onTranslate = async (langName) => {
+  _onInsert = (snippet: string) => {
     Actions.closePopover();
-    const translated = await translateMessageBody(this.props.draft.body, langCode);
 
     // Update the draft body through the session
-    this.props.session.changes.add({ body: translated });
+    this.props.session.changes.add({ body: `${this.props.draft.body}<p>${snippet}</p>` });
     this.props.session.changes.commit();
   };
 
@@ -880,9 +879,10 @@ export class TranslateComposerButton extends React.Component<{
     const buttonRect = (ReactDOM.findDOMNode(this) as HTMLElement).getBoundingClientRect();
     Actions.openPopover(
       <Menu
-        items={Object.keys(languages)}
+        items={SNIPPETS}
+        itemKey={item => item}
         itemContent={item => item}
-        onSelect={this._onTranslate}
+        onSelect={this._onInsert}
       />,
       { originRect: buttonRect, direction: 'up' }
     );
@@ -892,8 +892,7 @@ export class TranslateComposerButton extends React.Component<{
     if (this.props.draft.plaintext) return <span />;
     return (
       <button tabIndex={-1} className="btn btn-toolbar" onClick={this._onClick}>
-        <RetinaImg url="mailspring://translation/assets/icon@2x.png"
-                   mode={RetinaImg.Mode.ContentIsMask} />
+        <RetinaImg name="icon-composer-snippet.png" mode={RetinaImg.Mode.ContentIsMask} />
       </button>
     );
   }
@@ -955,7 +954,6 @@ import {
   Actions,
   DraftStore,
   DraftEditingSession,
-  FeatureUsageStore,
   PreferencesUIStore,
 
   // Models

@@ -116,6 +116,7 @@ lazyLoadAndRegisterTask(`GetMessageRFC2822Task`, 'get-message-rfc2822-task');
 lazyLoadAndRegisterTask(`GetManyRFC2822Task`, 'get-many-rfc2822-task');
 lazyLoadAndRegisterTask(`ExpungeAllInFolderTask`, 'expunge-all-in-folder-task');
 lazyLoadAndRegisterTask(`ChangeRoleMappingTask`, 'change-role-mapping-task');
+// Never queued; registered so rows persisted by older builds still deserialize.
 lazyLoadAndRegisterTask(`SendFeatureUsageEventTask`, 'send-feature-usage-event-task');
 lazyLoadAndRegisterTask(`DestroyContactTask`, 'destroy-contact-task');
 lazyLoadAndRegisterTask(`SyncbackContactTask`, 'syncback-contact-task');
@@ -139,13 +140,11 @@ load(`AccountStore`, 'flux/stores/account-store');
 load(`SignatureStore`, 'flux/stores/signature-store');
 load(`MessageStore`, 'flux/stores/message-store');
 load(`ContactStore`, 'flux/stores/contact-store');
-load(`IdentityStore`, 'flux/stores/identity-store');
 load(`CategoryStore`, 'flux/stores/category-store');
 load(`UndoRedoStore`, 'flux/stores/undo-redo-store');
 load(`WorkspaceStore`, 'flux/stores/workspace-store');
 load(`MailRulesStore`, 'flux/stores/mail-rules-store');
 load(`SendActionsStore`, 'flux/stores/send-actions-store');
-load(`FeatureUsageStore`, 'flux/stores/feature-usage-store');
 load(`ThreadCountsStore`, 'flux/stores/thread-counts-store');
 load(`AttachmentStore`, 'flux/stores/attachment-store');
 load(`OnlineStatusStore`, 'flux/stores/online-status-store');
@@ -212,14 +211,6 @@ lazyLoad(`SanitizeTransformer`, 'services/sanitize-transformer');
 lazyLoad(`QuotedHTMLTransformer`, 'services/quoted-html-transformer');
 lazyLoad(`InlineStyleTransformer`, 'services/inline-style-transformer');
 lazyLoad(`SearchableComponentMaker`, 'searchable-components/searchable-component-maker');
-
-// Composer Editor Plugin APIs
-// Used by internal packages that need to interact with editor plugins registered in core
-// (e.g. composer-grammar-check activates/deactivates the grammar Slate plugin via this API).
-lazyLoadWithGetter(
-  `GrammarCheckPluginAPI`,
-  () => require('../components/composer-editor/grammar-check-plugins').GrammarCheckPluginAPI
-);
 
 // Errors
 lazyLoadWithGetter(`APIError`, () => require('../flux/errors').APIError);

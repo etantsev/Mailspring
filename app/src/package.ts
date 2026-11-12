@@ -104,10 +104,6 @@ export default class Package {
     return !!this.json.engines.mailspring;
   }
 
-  isIdentityRequired() {
-    return !!this.json.isIdentityRequired;
-  }
-
   isDefault() {
     return !!this.json.isDefault;
   }

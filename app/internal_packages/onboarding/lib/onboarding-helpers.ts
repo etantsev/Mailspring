@@ -5,7 +5,6 @@ import crypto from 'crypto';
 import {
   Account,
   AccountStore,
-  IdentityStore,
   MailsyncProcess,
   localized,
 } from 'mailspring-exports';
@@ -573,7 +572,6 @@ export async function finalizeAndValidateAccount(account: Account) {
 
   // Test connections to IMAP and SMTP
   const proc = new MailsyncProcess(AppEnv.getLoadSettings());
-  proc.identity = IdentityStore.identity();
   proc.account = account;
   await proc.test();
 

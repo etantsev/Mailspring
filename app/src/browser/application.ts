@@ -438,19 +438,6 @@ export default class Application extends EventEmitter {
       win.browserWindow.inspectElement(x, y);
     });
 
-    this.on('application:add-identity', () => {
-      const onboarding = this.windowManager.get(WindowManager.ONBOARDING_WINDOW);
-      if (onboarding) {
-        onboarding.show();
-        onboarding.focus();
-      } else {
-        this.windowManager.ensureWindow(WindowManager.ONBOARDING_WINDOW, {
-          title: localized('Welcome to Mailspring'),
-          windowProps: {},
-        });
-      }
-    });
-
     this.on('application:add-account', ({ existingAccountJSON, o365SharedMailbox } = {}) => {
       const onboarding = this.windowManager.get(WindowManager.ONBOARDING_WINDOW);
       if (onboarding) {
@@ -1121,11 +1108,6 @@ export default class Application extends EventEmitter {
         main.sendMessage('open-preferences');
       } else if (parts.host === 'plugins') {
         main.sendMessage('changePluginStateFromUrl', urlToOpen);
-      } else if (parts.host === 'install-view') {
-        // A shared View's landing page (getmailspring.com/v/<shareId>) links here.
-        main.show();
-        main.focus();
-        main.sendMessage('install-view', urlToOpen);
       } else {
         main.sendMessage('openThreadFromWeb', urlToOpen);
       }

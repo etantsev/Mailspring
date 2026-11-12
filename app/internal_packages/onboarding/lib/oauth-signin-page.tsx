@@ -139,8 +139,8 @@ export default class OAuthSignInPage extends React.Component<
         return;
       }
       this._onReceivedCode(code);
-      response.writeHead(302, { Location: 'https://id.getmailspring.com/oauth/finished' });
-      response.end();
+      response.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+      response.end(localized('Sign-in complete. Return to Mailspring to continue.'));
     });
     this._server.once('error', (err) => {
       AppEnv.showErrorDialog({

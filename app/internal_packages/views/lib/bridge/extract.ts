@@ -49,7 +49,7 @@ const cache = new Map<string, ExtractResult>();
 const jobsByView = new Map<string, Set<ExtractJob>>();
 const hiddenViews = new Set<string>();
 
-// Field names agents tend to write, mapped to the schema.org properties that carry them.
+// Field names authors tend to write, mapped to the schema.org properties that carry them.
 const SYNONYMS: { [field: string]: string[] } = {
   carrier: ['carrier', 'provider'],
   trackingnumber: ['trackingNumber'],

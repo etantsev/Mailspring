@@ -21,7 +21,6 @@ import InlineAttachmentPlugins, { IMAGE_TYPE } from './inline-attachment-plugins
 import MarkdownPlugins from './markdown-plugins';
 import LinkPlugins from './link-plugins';
 import EmojiPlugins, { EMOJI_TYPE } from './emoji-plugins';
-import GrammarCheckPlugins from './grammar-check-plugins';
 import { Rule, ComposerEditorPlugin } from './types';
 
 import './patch-chrome-ime';
@@ -58,7 +57,6 @@ export const plugins: ComposerEditorPlugin[] = [
   ...BaseMarkPlugins,
   ...TemplatePlugins,
   ...EmojiPlugins,
-  ...GrammarCheckPlugins,
   ...LinkPlugins,
   ...BaseBlockPlugins,
   ...MarkdownPlugins,

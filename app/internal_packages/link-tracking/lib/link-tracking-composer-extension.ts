@@ -1,7 +1,6 @@
 import {
   ComposerExtension,
   RegExpUtils,
-  FeatureUsageStore,
   Message,
   Contact,
 } from 'mailspring-exports';
@@ -92,12 +91,5 @@ export default class LinkTrackingComposerExtension extends ComposerExtension {
       metadata.shared_body = true;
     }
     draft.directlyAttachMetadata(PLUGIN_ID, metadata);
-  }
-
-  static onSendSuccess(draft: Message) {
-    const metadata = draft.metadataForPluginId(PLUGIN_ID);
-    if (metadata) {
-      FeatureUsageStore.markUsed(PLUGIN_ID);
-    }
   }
 }

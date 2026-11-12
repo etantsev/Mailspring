@@ -155,11 +155,6 @@ export const openPreferences = create('openPreferences', ActionScopeGlobal);
 export const switchPreferencesTab = create('switchPreferencesTab', ActionScopeGlobal);
 
 /*
-  Public: Manage the Mailspring identity
-  */
-export const logoutMailspringIdentity = create('logoutMailspringIdentity', ActionScopeWindow);
-
-/*
   Public: Remove the selected account
 
   *Scope: Window*

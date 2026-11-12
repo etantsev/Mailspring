@@ -11,7 +11,6 @@ export default class PackageManager {
   active: { [packageName: string]: Package } = {};
   resourcePath: string;
   configDirPath: string;
-  identityPresent: boolean;
 
   constructor({
     configDirPath,
@@ -28,7 +27,6 @@ export default class PackageManager {
   }) {
     this.resourcePath = resourcePath;
     this.configDirPath = configDirPath;
-    this.identityPresent = !!AppEnv.config.get('identity');
 
     if (specMode) {
       this.packageDirectories.push(path.join(resourcePath, 'spec', 'fixtures', 'packages'));
@@ -43,25 +41,6 @@ export default class PackageManager {
     }
 
     this.discoverPackages();
-
-    // If the user starts without a Mailspring ID and then links one, immediately turn on the
-    // packages that require it. (Note: When you log OUT we currently just reboot the app, so
-    // this only goes one way, which is also convenient because unloading the built-in packages
-    // hasn't been tested much.)
-
-    // Note: Ideally we'd use the IdentityStore here but we can't load it this early in app
-    // launch without introducing a circular import.
-    AppEnv.config.onDidChange('identity', () => {
-      if (!this.identityPresent && !!AppEnv.config.get('identity')) {
-        this.identityPresent = true;
-        // Config IPC can arrive re-entrantly mid-boot; skip until AppEnv is
-        // ready. startWindow()/populateHotWindow() will activate packages
-        // again once boot finishes.
-        if (AppEnv.bootComplete) {
-          this.activatePackages(AppEnv.getLoadSettings().windowType);
-        }
-      }
-    });
   }
 
   discoverPackages() {
@@ -127,10 +106,6 @@ export default class PackageManager {
 
     const disabled = AppEnv.config.get('core.disabledPackages');
     if (pkg.isOptional() && Array.isArray(disabled) && disabled.includes(pkg.name)) {
-      return;
-    }
-
-    if (pkg.isIdentityRequired() && !this.identityPresent) {
       return;
     }
 

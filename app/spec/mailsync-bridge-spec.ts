@@ -4,7 +4,6 @@ import { Account, AccountStore, Actions } from 'mailspring-exports';
 import MailsyncBridge from '../src/flux/mailsync-bridge';
 import { MailsyncProcess } from '../src/mailsync-process';
 import KeyManager from '../src/key-manager';
-import { IdentityStore } from '../src/flux/stores/identity-store';
 
 describe('MailsyncBridge account clients', function () {
   let accounts: Account[];
@@ -61,7 +60,6 @@ describe('MailsyncBridge account clients', function () {
   });
 
   it('leaves an account alone while its cache is being reset', async function () {
-    spyOn(IdentityStore, 'identity').andReturn(null);
     let finishReset: () => void;
     spyOn(MailsyncProcess.prototype, 'resetCache').andCallFake(
       () => new Promise<void>((resolve) => (finishReset = resolve))

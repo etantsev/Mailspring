@@ -15,9 +15,9 @@ export type DiagnosticKind =
   | 'consent';
 
 /**
- * One thing that happened to a View, shown in the authoring UI and relayed to the agent that
- * wrote it. A View can put anything it can read into its error messages and stacks, so the
- * agent relay (agent/tools.ts) sends only fields the host produced itself.
+ * One thing that happened to a View, reported to its author through `$m.ViewAuthoring`. A View
+ * can put anything it can read into its error messages and stacks, so treat those fields as
+ * View-controlled.
  */
 export interface Diagnostic {
   ts: number;

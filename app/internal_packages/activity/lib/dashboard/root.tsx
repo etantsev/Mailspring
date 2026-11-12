@@ -21,7 +21,6 @@ import {
   MetricBucket,
 } from './metrics-components';
 
-import ShareButton from './share-button';
 import { LINK_TRACKING_ID, OPEN_TRACKING_ID } from '../plugin-helpers';
 import { exportCsv } from '../csv-export';
 import { forEachMessageIn } from '../message-scan';
@@ -197,7 +196,6 @@ interface DelayMetric {
 
 interface RootState {
   loading: boolean;
-  version: number;
   metricsBySubjectLine: SubjectStatsEntry[];
   metricsByLink: LinkStatsEntry[];
   firstOpenBuckets: MetricBucket[];
@@ -257,7 +255,6 @@ export default class ActivityReports extends React.Component<RootProps, RootStat
 
   getLoadingState({ timespan }: RootProps): RootState {
     return {
-      version: 0,
       loading: true,
       metrics: {
         receivedByDay: Array(timespan.days).fill(0),
@@ -500,7 +497,6 @@ export default class ActivityReports extends React.Component<RootProps, RootStat
       const replyCount = (n: number) => localized('%@ replies', n);
       this.setState({
         loading: false,
-        version: this.state.version + 1,
         metricsBySubjectLine: bySubjectSorted,
         metricsByLink: byLinkSorted,
         firstOpenBuckets: delayBuckets(firstOpenDelaysAll, (n) => localized('%@ first opens', n)),
@@ -596,7 +592,6 @@ export default class ActivityReports extends React.Component<RootProps, RootStat
       firstOpenBuckets,
       openRateByHour,
       openRateByWeekday,
-      version,
       loading,
     } = this.state;
     const { timespan } = this.props;
@@ -682,12 +677,10 @@ export default class ActivityReports extends React.Component<RootProps, RootStat
               lowTrackingPhrase,
               <RetinaImg
                 name="icon-activity-mailopen.png"
-                className="hidden-on-web"
                 mode={RetinaImg.Mode.ContentDark}
               />,
               <RetinaImg
                 name="icon-activity-linkopen.png"
-                className="hidden-on-web"
                 mode={RetinaImg.Mode.ContentDark}
               />
             )}
@@ -786,14 +779,13 @@ export default class ActivityReports extends React.Component<RootProps, RootStat
           </MetricCard>
         </div>
 
-        <div className="report-actions hidden-on-web">
+        <div className="report-actions">
           <div className="btn" onClick={this._onLearnMore}>
             {localized('Learn More')}
           </div>
           <div className="btn" onClick={this._onExport}>
             {localized('Export Raw Data')}
           </div>
-          <ShareButton key={version} />
         </div>
       </div>
     );

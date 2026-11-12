@@ -114,7 +114,6 @@ export * from '../flux/stores/signature-store';
 export * from '../flux/stores/message-store';
 export type ContactStore = typeof import('../flux/stores/contact-store').default;
 export const ContactStore: ContactStore;
-export * from '../flux/stores/identity-store';
 export type CategoryStore = typeof import('../flux/stores/category-store').default;
 export const CategoryStore: CategoryStore;
 export type UndoRedoStore = typeof import('../flux/stores/undo-redo-store').default;
@@ -124,7 +123,6 @@ export const WorkspaceStore: WorkspaceStore;
 export type MailRulesStore = typeof import('../flux/stores/mail-rules-store').default;
 export const MailRulesStore: MailRulesStore;
 export * from '../flux/stores/send-actions-store';
-export * from '../flux/stores/feature-usage-store';
 export type ThreadCountsStore = typeof import('../flux/stores/thread-counts-store').default;
 export const ThreadCountsStore: ThreadCountsStore;
 export type AttachmentStore = typeof import('../flux/stores/attachment-store').default;
@@ -261,13 +259,6 @@ export const QuotedHTMLTransformer: QuotedHTMLTransformer;
 export type InlineStyleTransformer = typeof import('../services/inline-style-transformer').default;
 export const InlineStyleTransformer: InlineStyleTransformer;
 export * from '../searchable-components/searchable-component-maker';
-
-// Composer Editor Plugin APIs
-export type GrammarCheckPluginAPI =
-  typeof import('../components/composer-editor/grammar-check-plugins').GrammarCheckPluginAPI;
-export const GrammarCheckPluginAPI: GrammarCheckPluginAPI;
-export type GrammarCheckStoreAPI =
-  typeof import('../components/composer-editor/grammar-check-plugins').GrammarCheckStoreAPI;
 
 // Errors
 export * from '../flux/errors';

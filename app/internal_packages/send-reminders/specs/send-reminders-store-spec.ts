@@ -17,15 +17,12 @@ function threadWithReminder(value: Record<string, unknown>) {
   return thread;
 }
 
-async function dispatch(thread: Thread, type = 'persist') {
+function dispatch(thread: Thread, type = 'persist') {
   (SendRemindersStore as any)._onDatabaseChanged({
     type,
     objectClass: Thread.name,
     objects: [thread],
   });
-  // updateReminderMetadata queues its task after an awaited feature-usage check;
-  // timers are frozen in specs, so drain microtasks instead of using setTimeout.
-  for (let i = 0; i < 5; i++) await Promise.resolve();
 }
 
 function queuedMetadataValue() {
@@ -49,8 +46,8 @@ describe('SendRemindersStore', function sendRemindersStore() {
     // sync engine copies that verbatim onto the thread when the message sends.
     const promoted = { expiration: EXPIRATION, sentHeaderMessageId: 'sent-1' };
 
-    it('records the reply baseline instead of clearing the reminder', async () => {
-      await dispatch(threadWithReminder(promoted));
+    it('records the reply baseline instead of clearing the reminder', () => {
+      dispatch(threadWithReminder(promoted));
 
       const value = queuedMetadataValue();
       expect(value.expiration).toBe(EXPIRATION.getTime() / 1000);
@@ -59,8 +56,8 @@ describe('SendRemindersStore', function sendRemindersStore() {
       expect(value.shouldNotify).toBe(false);
     });
 
-    it('still fires the reminder if the expiration event arrives before a baseline was recorded', async () => {
-      await dispatch(
+    it('still fires the reminder if the expiration event arrives before a baseline was recorded', () => {
+      dispatch(
         threadWithReminder({ ...promoted, expiration: new Date(Date.now() - 1000) }),
         'metadata-expiration'
       );
@@ -73,8 +70,8 @@ describe('SendRemindersStore', function sendRemindersStore() {
   });
 
   describe('when reminder metadata already has a reply baseline', () => {
-    it('leaves the reminder alone if no reply has arrived', async () => {
-      await dispatch(
+    it('leaves the reminder alone if no reply has arrived', () => {
+      dispatch(
         threadWithReminder({
           expiration: EXPIRATION,
           sentHeaderMessageId: 'sent-1',
@@ -85,8 +82,8 @@ describe('SendRemindersStore', function sendRemindersStore() {
       expect(Actions.queueTask).not.toHaveBeenCalled();
     });
 
-    it('clears the reminder when a new message has arrived on the thread', async () => {
-      await dispatch(
+    it('clears the reminder when a new message has arrived on the thread', () => {
+      dispatch(
         threadWithReminder({
           expiration: EXPIRATION,
           sentHeaderMessageId: 'sent-1',

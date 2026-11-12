@@ -2,7 +2,6 @@ import MailspringStore from 'mailspring-store';
 
 import {
   localized,
-  FeatureUsageStore,
   SyncbackMetadataTask,
   Actions,
   DatabaseStore,
@@ -34,15 +33,6 @@ class _SnoozeStore extends MailspringStore {
 
   _onSnoozeThreads = async (threads: Thread[], snoozeDate: string, label: string) => {
     try {
-      // ensure the user is authorized to use this feature
-      await FeatureUsageStore.markUsedOrUpgrade('snooze', {
-        headerText: localized('All Snoozes Used'),
-        rechargeText: `${localized(
-          `You can snooze %1$@ emails each %2$@ with Mailspring Basic.`
-        )} ${localized('Upgrade to Pro today!')}`,
-        iconUrl: 'mailspring://thread-snooze/assets/ic-snooze-modal@2x.png',
-      });
-
       // move the threads to the snoozed folder
       await moveThreads(threads, {
         snooze: true,
@@ -62,9 +52,6 @@ class _SnoozeStore extends MailspringStore {
         )
       );
     } catch (error) {
-      if (error instanceof FeatureUsageStore.NoProAccessError) {
-        return;
-      }
       moveThreads(threads, { snooze: false, description: 'Unsnoozed' });
       Actions.closePopover();
       AppEnv.reportError(error);

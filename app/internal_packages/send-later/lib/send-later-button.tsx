@@ -1,13 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import moment from 'moment';
-import {
-  localized,
-  Actions,
-  FeatureUsageStore,
-  Message,
-  DraftEditingSession,
-} from 'mailspring-exports';
+import { localized, Actions, Message, DraftEditingSession } from 'mailspring-exports';
 import { RetinaImg } from 'mailspring-component-kit';
 
 import SendLaterPopover from './send-later-popover';
@@ -65,7 +59,7 @@ class SendLaterButton extends Component<SendLaterButtonProps, SendLaterButtonSta
     this.mounted = false;
   }
 
-  onAssignSendLaterDate = async (sendLaterDate: Date, dateLabel?: string) => {
+  onAssignSendLaterDate = (sendLaterDate: Date, dateLabel?: string) => {
     if (!this.props.isValidDraft()) {
       return;
     }
@@ -76,23 +70,7 @@ class SendLaterButton extends Component<SendLaterButtonProps, SendLaterButtonSta
       return;
     }
 
-    // Only check for feature usage and record metrics if this draft is not
-    // already set to send later.
     if (!currentSendLaterDate) {
-      try {
-        await FeatureUsageStore.markUsedOrUpgrade('send-later', {
-          headerText: localized('All Scheduled Sends Used'),
-          rechargeText: `${localized(
-            `You can schedule sending of %1$@ emails each %2$@ with Mailspring Basic.`
-          )} ${localized('Upgrade to Pro today!')}`,
-          iconUrl: 'mailspring://send-later/assets/ic-send-later-modal@2x.png',
-        });
-      } catch (error) {
-        if (error instanceof FeatureUsageStore.NoProAccessError) {
-          return;
-        }
-      }
-
       this.setState({ saving: true });
     }
 

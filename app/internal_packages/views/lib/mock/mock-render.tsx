@@ -25,7 +25,7 @@ export interface MockRenderOptions {
  * Renders a View from its mock-data.json and returns a screenshot of it. Nothing of the user's
  * mail reaches the View: it runs in an offline, in-memory session (view-sessions.ts) against a
  * bridge that only knows the mock data (mock-bridge.ts). This is how a View gets a picture for
- * its starter card or a share link without anyone seeing real mail.
+ * its starter card without anyone seeing real mail.
  *
  * The host is mounted for real but behind the workspace, because Chromium doesn't paint a
  * guest that is off screen.

@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { ViewManifest, readManifest } from '../view-registry';
 import { ViewRevision, writeView } from '../authoring/revisions';
-import { newViewId } from '../agent/store';
 
 /**
  * Starters are Views that ship with the app. They're templates rather than Views: a starter
@@ -60,6 +59,17 @@ export function readStarterRevision(starter: ViewManifest, viewId: string): View
     starter: { id: starter.id, version: starter.json.version || null },
   };
   return { manifest, files };
+}
+
+/** A partition-safe id derived from the View's name, unique per call. */
+export function newViewId(name: string) {
+  const slug = (name || 'view')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+  const suffix = Math.random().toString(36).slice(2, 8);
+  return `${slug || 'view'}-${suffix}`;
 }
 
 /** Copies a starter to a new View and returns its id. */
