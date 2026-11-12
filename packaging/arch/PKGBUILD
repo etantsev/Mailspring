@@ -2,9 +2,9 @@
 # system electron44, like the AUR mailspring-bin it replaces. Not published to the AUR, so
 # paru/yay leave it alone on upgrades.
 #
-#   cd packaging/arch && makepkg -f && sudo pacman -U mailspring-fork-*.pkg.tar.zst
+#   cd packaging/arch && makepkg -fi
 pkgname=mailspring-fork
-pkgver=1.26.2.r8337.g60d49f7d2
+pkgver=1.26.2.r8340.g2e26f2819
 pkgrel=1
 pkgdesc="Mailspring mail client, fork without the Mailspring ID account"
 arch=('x86_64')

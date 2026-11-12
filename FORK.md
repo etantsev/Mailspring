@@ -82,7 +82,7 @@ npm run build -- --skip-installers # → app/dist/mailspring-linux-x64/resources
 `electron44`. В AUR его нет, поэтому paru не перезаписывает сборку при обновлениях.
 
 ```bash
-cd packaging/arch && makepkg -f && sudo pacman -U mailspring-fork-*.pkg.tar.zst
+cd packaging/arch && makepkg -fi
 git push origin master && git push tantsev master
 ```
 
