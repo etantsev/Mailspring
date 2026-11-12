@@ -1,0 +1,48 @@
+# Packages the fork from a local `npm run build -- --skip-installers` output. It runs on the
+# system electron44, like the AUR mailspring-bin it replaces. Not published to the AUR, so
+# paru/yay leave it alone on upgrades.
+#
+#   cd packaging/arch && makepkg -f && sudo pacman -U mailspring-fork-*.pkg.tar.zst
+pkgname=mailspring-fork
+pkgver=1.26.2.r8337.g60d49f7d2
+pkgrel=1
+pkgdesc="Mailspring mail client, fork without the Mailspring ID account"
+arch=('x86_64')
+url="https://github.com/etantsev/Mailspring"
+license=('GPL-3.0-only')
+provides=("mailspring=${pkgver}")
+conflicts=('mailspring' 'mailspring-bin')
+depends=('electron44' 'krb5' 'db5.3' 'tidy')
+options=('!strip' '!debug')
+source=('mailspring.sh' 'mailspring.js' 'Mailspring.desktop' 'mailspring.metainfo.xml')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+_repo="$(realpath "${startdir}/../..")"
+_resources="${_repo}/app/dist/mailspring-linux-x64/resources"
+
+pkgver() {
+    local base
+    base="$(sed -n 's/^  "version": "\(.*\)",$/\1/p' "${_repo}/app/package.json")"
+    printf '%s.r%s.g%s' "${base}" \
+        "$(git -C "${_repo}" rev-list --count HEAD)" \
+        "$(git -C "${_repo}" rev-parse --short HEAD)"
+}
+
+prepare() {
+    if [[ ! -f "${_resources}/app.asar" ]]; then
+        echo "No build at ${_resources}; run 'npm run build -- --skip-installers' first." >&2
+        return 1
+    fi
+}
+
+package() {
+    install -Dm755 mailspring.sh "${pkgdir}/usr/bin/mailspring"
+    install -Dm644 mailspring.js -t "${pkgdir}/usr/lib/mailspring"
+    cp -r --no-preserve=ownership --preserve=mode,timestamps,links "${_resources}/." "${pkgdir}/usr/lib/mailspring/"
+    install -Dm644 Mailspring.desktop -t "${pkgdir}/usr/share/applications"
+    install -Dm644 mailspring.metainfo.xml -t "${pkgdir}/usr/share/metainfo"
+    for size in 16 32 64 128 256 512; do
+        install -Dm644 "${_repo}/app/build/resources/linux/icons/${size}.png" \
+            "${pkgdir}/usr/share/icons/hicolor/${size}x${size}/apps/mailspring.png"
+    done
+}
