@@ -8,8 +8,8 @@ export default class SignaturePhotoPicker extends React.Component<{
   render() {
     const { data } = this.props;
 
-    let source = data.photoURL || '';
-    if (!['gravatar', 'company', ''].includes(source)) {
+    let source = data.photoURL === 'company' ? '' : data.photoURL || '';
+    if (!['gravatar', ''].includes(source)) {
       source = 'custom';
     }
 
@@ -26,7 +26,6 @@ export default class SignaturePhotoPicker extends React.Component<{
           >
             <option value="">{localized('None')}</option>
             <option value="gravatar">{localized('Gravatar Profile Photo')}</option>
-            <option value="company">{localized('Company / Domain Logo')}</option>
             <option disabled>──────────</option>
             <option value="custom">{localized('Custom Image…')}</option>
           </select>

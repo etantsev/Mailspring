@@ -1,4 +1,4 @@
-import { localized, Actions, AccountStore } from 'mailspring-exports';
+import { Actions } from 'mailspring-exports';
 import MailspringStore from 'mailspring-store';
 import _ from 'underscore';
 
@@ -36,27 +36,9 @@ class _SignatureStore extends MailspringStore {
     this.signatures = AppEnv.config.get(`signatures`);
     this.defaultSignatures = AppEnv.config.get(`defaultSignatures`) || {};
 
-    // If the user has no signatures (after a clean install or upgrade from 1.0.9),
-    // create a default one for them and apply it to all their accounts.
+    // A clean install starts with no signatures; outgoing mail carries none until the user adds one.
     if (!this.signatures) {
-      const sentFrom = localized('Sent from Mailspring, the best free email app for work');
-      this.signatures = {
-        initial: {
-          id: 'initial',
-          title: localized('Default'),
-          body: `<div><div>${sentFrom.replace(
-            'Mailspring',
-            '<a href="https://getmailspring.com/">Mailspring</a>'
-          )}</div></div>`,
-          data: {
-            title: sentFrom,
-            templateName: 'SignatureB',
-          },
-        },
-      };
-      AccountStore.accounts().forEach((a) => {
-        this.defaultSignatures[a.emailAddress] = 'initial';
-      });
+      this.signatures = {};
     }
 
     // migrate signatures that didn't have a `data` property

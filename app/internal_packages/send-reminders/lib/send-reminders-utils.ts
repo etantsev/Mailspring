@@ -39,10 +39,7 @@ function assertMetadataShape(value: Record<string, unknown>) {
   }
 }
 
-export function updateReminderMetadata(
-  thread: Thread,
-  metadataValue: Record<string, unknown>
-) {
+export function updateReminderMetadata(thread: Thread, metadataValue: Record<string, unknown>) {
   assertMetadataShape(metadataValue);
   Actions.queueTask(
     SyncbackMetadataTask.forSaving({

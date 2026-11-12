@@ -232,17 +232,6 @@ module.exports = {
     { label: localized('Install Theme') + '...', command: 'window:install-package' },
     { type: 'separator' },
     { label: 'VERSION', enabled: false },
-    {
-      label: localized('Restart and Install Update'),
-      command: 'application:install-update',
-      visible: false,
-    },
-    {
-      label: localized('Check for Updates'),
-      command: 'application:check-for-update',
-      visible: false,
-    },
-    { label: localized('Downloading Update'), enabled: false, visible: false },
     { type: 'separator' },
     { label: localized('Print Current Thread'), command: 'core:print-thread' },
     { type: 'separator' },

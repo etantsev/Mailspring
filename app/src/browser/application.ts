@@ -25,7 +25,6 @@ import WindowManager from './window-manager';
 import FileListCache from './file-list-cache';
 import ConfigMigrator from './config-migrator';
 import ApplicationMenu from './application-menu';
-import AutoUpdateManager from './autoupdate-manager';
 import SystemAccentWatcher from './system-accent-watcher';
 import SystemTrayManager from './system-tray-manager';
 import { DefaultClientHelper } from '../default-client-helper';
@@ -88,7 +87,6 @@ export default class Application extends EventEmitter {
   applicationMenu: ApplicationMenu;
   mailspringProtocolHandler: MailspringProtocolHandler;
   windowManager: WindowManager;
-  autoUpdateManager: AutoUpdateManager;
   systemAccentWatcher: SystemAccentWatcher;
   systemTrayManager: SystemTrayManager;
   windowsTaskbarManager?: WindowsTaskbarManager;
@@ -180,7 +178,6 @@ export default class Application extends EventEmitter {
     await this.oneTimeAddToDock();
 
     guardAuxiliaryWindowNavigation();
-    this.autoUpdateManager = new AutoUpdateManager(version, config, specMode);
     this.applicationMenu = new ApplicationMenu(version);
     this.windowManager = new WindowManager({
       resourcePath: this.resourcePath,
@@ -470,11 +467,6 @@ export default class Application extends EventEmitter {
       this.windowManager.get(WindowManager.MAIN_WINDOW)?.sendMessage('show-calendar', focusEvent);
     });
 
-    this.on('application:show-activity', () => {
-      this.ensureWindowsForTokenState();
-      this.windowManager.get(WindowManager.MAIN_WINDOW)?.sendMessage('show-activity');
-    });
-
     // Only the main window's MailsyncBridge has sync clients, so other windows route a
     // refresh through here.
     this.on('application:sync-calendar', (accountId?: string) => {
@@ -513,16 +505,6 @@ export default class Application extends EventEmitter {
 
     this.on('application:show-main-window', () => {
       this.ensureWindowsForTokenState();
-    });
-
-    this.on('application:check-for-update', () => {
-      this.autoUpdateManager.check();
-    });
-
-    this.on('application:install-update', () => {
-      this.quitting = true;
-      this.windowManager.cleanupBeforeAppQuit();
-      this.autoUpdateManager.install();
     });
 
     this.on('application:toggle-dev', () => {
@@ -902,61 +884,6 @@ export default class Application extends EventEmitter {
       sourceWindow.webContents.send('remote-run-results', params);
       delete this._sourceWindows[params.taskId];
     });
-
-    onFromMailspringWindows(
-      ipcMain,
-      'report-error',
-      (event, params: { extra?: string; errorJSON?: string } = {}) => {
-        try {
-          const errorParams = JSON.parse(params.errorJSON || '{}');
-          const extra = JSON.parse(params.extra || '{}');
-
-          // LESS compilation errors from custom themes/plugins are already handled
-          // by the theme error dialog (encountered-theme-error IPC handler). These
-          // errors have no useful stack trace when reported to Sentry because
-          // LessError objects don't carry a JS stack, so the Sentry report only
-          // shows the IPC handler call site. Skip reporting them.
-          if (
-            errorParams &&
-            typeof errorParams === 'object' &&
-            typeof errorParams.line === 'number' &&
-            Array.isArray(errorParams.extract) &&
-            (errorParams.type === 'Parse' || errorParams.type === 'Syntax')
-          ) {
-            event.returnValue = true;
-            return;
-          }
-
-          // Use new Error(message) to ensure the message is set as a proper Error property,
-          // since Object.assign on an Error with no initial message may not propagate it
-          // correctly to error reporting tools like Sentry/Raven.
-          const message =
-            errorParams && typeof errorParams === 'object' ? errorParams.message : undefined;
-          const stack =
-            errorParams && typeof errorParams === 'object' ? errorParams.stack : undefined;
-
-          // Drop reports with neither a message nor a stack: they would surface
-          // in Sentry as "Unknown error" with only this IPC handler frame,
-          // which is unactionable. The renderer wraps inputs before sending so
-          // this is defense-in-depth for any path that bypasses that wrapping.
-          if (!message && !stack) {
-            event.returnValue = true;
-            return;
-          }
-
-          const err = new Error(message || undefined);
-          if (stack) {
-            err.stack = stack;
-          }
-          Object.assign(err, errorParams);
-          global.errorLogger.reportError(err, extra);
-        } catch (parseError) {
-          console.error(parseError);
-          global.errorLogger.reportError(parseError, {});
-        }
-        event.returnValue = true;
-      }
-    );
 
     onFromMailspringWindows(ipcMain, 'resize-window', (event, params) => {
       const sourceWindow = BrowserWindow.fromWebContents(event.sender);

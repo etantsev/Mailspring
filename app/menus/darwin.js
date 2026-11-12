@@ -20,18 +20,6 @@ module.exports = {
           args: { source: 'Menu' },
         },
         { label: 'VERSION', enabled: false },
-        {
-          label: localized('Restart and Install Update'),
-          command: 'application:install-update',
-          visible: false,
-        },
-        {
-          label: localized('Check for Updates'),
-          command: 'application:check-for-update',
-          visible: false,
-        },
-        { label: localized('Downloading Update'), enabled: false, visible: false },
-        { type: 'separator' },
         { type: 'separator' },
         { label: localized('Services'), submenu: [] },
         { type: 'separator' },

@@ -96,7 +96,6 @@ lazyLoad('TokenizingTextField', 'tokenizing-text-field');
 lazyLoad('ParticipantsTextField', 'participants-text-field');
 lazyLoad('MultiselectToolbar', 'multiselect-toolbar');
 lazyLoad('InjectedComponentSet', 'injected-component-set');
-lazyLoad('MetadataComposerToggleButton', 'metadata-composer-toggle-button');
 lazyLoad('ConfigPropContainer', 'config-prop-container');
 lazyLoad('DisclosureTriangle', 'disclosure-triangle');
 lazyLoad('EditableList', 'editable-list');

@@ -2,12 +2,7 @@
 
 import qs from 'querystring';
 import crypto from 'crypto';
-import {
-  Account,
-  AccountStore,
-  MailsyncProcess,
-  localized,
-} from 'mailspring-exports';
+import { Account, AccountStore, MailsyncProcess, localized } from 'mailspring-exports';
 import MailspringProviderSettings from './mailspring-provider-settings.json';
 import MailcoreProviderSettings from './mailcore-provider-settings.json';
 import dns, { SrvRecord } from 'dns';

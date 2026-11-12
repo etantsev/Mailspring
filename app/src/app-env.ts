@@ -1002,14 +1002,6 @@ export default class AppEnvConstructor {
     process.crash();
   }
 
-  onUpdateAvailable(callback) {
-    return this.emitter.on('update-available', callback);
-  }
-
-  updateAvailable(details) {
-    this.emitter.emit('update-available', details);
-  }
-
   // Lets multiple components register beforeUnload callbacks.
   // The callbacks are expected to return either true or false.
   //

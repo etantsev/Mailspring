@@ -43,7 +43,7 @@ node --experimental-websocket scripts/eval.mjs "<js>" [out.png] [clickX clickY]
 
 Useful snippets inside the JS:
 
-- Navigate to a section: `$m.Actions.selectRootSheet($m.WorkspaceStore.Sheet.Activity)` (or `.Calendar`); `$m.FocusedPerspectiveStore.showMail()` returns to Mail
+- Navigate to a section: `$m.Actions.selectRootSheet($m.WorkspaceStore.Sheet.Calendar)`; `$m.FocusedPerspectiveStore.showMail()` returns to Mail
 - Pick from a `DropdownMenu`: click `.dropdown-menu > div`, wait 300ms, then find the
   item by text under `.menu div` and dispatch `mousedown` **and** `click` on it.
 - Drive a controlled `<input>`: set the value through
@@ -90,8 +90,7 @@ current mailbox, and pass its contents as the `setup-js` (after the view has loa
 
 ### Seed the database when there's nothing to show
 
-`scripts/seed-tracking-metadata.py` writes fake open/click metadata onto real sent
-messages. Pattern for any similar seeding:
+Pattern for writing fake data (e.g. plugin metadata on real messages):
 
 1. Stop the app **and** mailsync; `cp edgehill.db edgehill.db.bak-<reason>`.
 2. Write both places the UI reads from — the model's JSON blob (`Message.data`,

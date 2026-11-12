@@ -347,11 +347,6 @@ export default {
             default: true,
             title: localized('Show notifications for new unread messages'),
           },
-          enabledForRepeatedTrackingEvents: {
-            type: 'boolean',
-            default: true,
-            title: localized('Show notifications for repeated opens / clicks'),
-          },
           sounds: {
             type: 'boolean',
             default: true,

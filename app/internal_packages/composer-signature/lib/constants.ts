@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import URL from 'url';
 import { localized } from 'mailspring-exports';
 import ReactDOMServer from 'react-dom/server';
 import Templates from './templates';
@@ -121,14 +120,8 @@ export const ResolveSignatureData = (data: Record<string, string>) => {
     data.photoURL = `https://www.gravatar.com/avatar/${hash}/?s=160&msw=160&msh=160`;
   }
 
-  if (data.photoURL === 'company') {
-    const domain =
-      (data.websiteURL && URL.parse(data.websiteURL).hostname) ||
-      (data.email && data.email.split('@').pop());
-    data.photoURL = `https://logo.getmailspring.com/company-logo/${domain}?msw=128&msh=128`;
-  }
-
-  if (data.photoURL === 'custom') {
+  // 'company' (domain logo) required a third-party logo service, so it renders no photo.
+  if (data.photoURL === 'custom' || data.photoURL === 'company') {
     data.photoURL = '';
   }
 

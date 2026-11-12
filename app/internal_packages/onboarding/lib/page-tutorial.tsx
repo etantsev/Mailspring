@@ -17,19 +17,6 @@ const Steps = [
   },
   {
     seen: false,
-    id: 'activity',
-    title: localized('Track opens and clicks'),
-    image: 'feature-activity@2x.png',
-    description: localized(
-      'With activity tracking, you’ll know as soon as someone reads your message. Sending to a group? Mailspring shows you which recipients opened your email so you can follow up with precision.'
-    ),
-    x: 12.8,
-    y: 1,
-    xDot: 15,
-    yDot: 5.1,
-  },
-  {
-    seen: false,
     id: 'snooze',
     title: localized('Send on your own schedule'),
     image: 'feature-snooze@2x.png',

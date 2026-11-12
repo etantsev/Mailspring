@@ -151,7 +151,7 @@ export class SendDraftTask extends Task {
       SoundRegistry.playSound('send');
     }
 
-    // Fire off events to record the usage of open and link tracking
+    // Let composer extensions react to a successful send
     const extensions = ComposerExtensionRegistry.extensions();
     for (const ext of extensions) {
       if (ext.onSendSuccess) {

@@ -19,7 +19,6 @@ interface SheetSet {
   Thread: SheetDeclaration;
   File: SheetDeclaration;
   Preferences: SheetDeclaration;
-  Activity: SheetDeclaration;
   Drafts: SheetDeclaration;
   Main: SheetDeclaration;
   Threads: SheetDeclaration;

@@ -23,9 +23,6 @@ export default class ApplicationMenu {
   constructor(version: string) {
     this.version = version;
     this.setActiveTemplate(this.getDefaultTemplate());
-    global.application.autoUpdateManager.on('state-changed', (state: string) => {
-      this.updateAutoupdateMenuItem(state);
-    });
   }
 
   // Public: Updates the entire menu with the given keybindings.
@@ -57,7 +54,6 @@ export default class ApplicationMenu {
     this.menu = Menu.buildFromTemplate(fullTemplate);
     Menu.setApplicationMenu(this.menu);
 
-    this.updateAutoupdateMenuItem(global.application.autoUpdateManager.getState());
     this.updateFullscreenMenuItem(
       this.lastFocusedWindow != null && this.lastFocusedWindow.isFullScreen()
     );
@@ -169,43 +165,6 @@ export default class ApplicationMenu {
     return windowMenu.submenu.splice(idx, 0, { type: 'separator' }, ...windowsItems);
   }
 
-  // Sets the proper visible state the update menu items
-  updateAutoupdateMenuItem(state: string) {
-    const checkForUpdateItem = this.flattenMenuItems(this.menu).find(
-      ({ label }) => label === localized('Check for Updates')
-    );
-    const downloadingUpdateItem = this.flattenMenuItems(this.menu).find(
-      ({ label }) => label === localized('Downloading Update')
-    );
-    const installUpdateItem = this.flattenMenuItems(this.menu).find(
-      ({ label }) => label === localized('Restart and Install Update')
-    );
-
-    if (checkForUpdateItem == null || downloadingUpdateItem == null || installUpdateItem == null) {
-      return;
-    }
-
-    checkForUpdateItem.visible = false;
-    downloadingUpdateItem.visible = false;
-    installUpdateItem.visible = false;
-
-    switch (state) {
-      case 'idle':
-      case 'error':
-      case 'no-update-available':
-        checkForUpdateItem.visible = true;
-        break;
-      case 'checking':
-      case 'downloading':
-        downloadingUpdateItem.visible = true;
-        break;
-      case 'update-available':
-        installUpdateItem.visible = true;
-        break;
-      default:
-    }
-  }
-
   updateFullscreenMenuItem(fullscreen: boolean) {
     const enterItem = this.flattenMenuItems(this.menu).find(
       ({ label }) => label === localized('Enter Full Screen')
@@ -237,7 +196,6 @@ export default class ApplicationMenu {
       {
         label: 'Mailspring',
         submenu: [
-          { label: localized('Check for Updates'), metadata: { autoUpdate: true } },
           {
             label: localized('Reload'),
             accelerator: 'CmdOrCtrl+R',

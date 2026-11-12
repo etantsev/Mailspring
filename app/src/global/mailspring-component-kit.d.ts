@@ -31,7 +31,6 @@ export * from '../components/tokenizing-text-field';
 export const ParticipantsTextField: typeof import('../components/participants-text-field').default;
 export const MultiselectToolbar: typeof import('../components/multiselect-toolbar').default;
 export * from '../components/injected-component-set';
-export const MetadataComposerToggleButton: typeof import('../components/metadata-composer-toggle-button').default;
 export * from '../components/config-prop-container';
 export * from '../components/disclosure-triangle';
 export const EditableList: typeof import('../components/editable-list').default;

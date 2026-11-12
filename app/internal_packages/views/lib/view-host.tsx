@@ -4,11 +4,7 @@ import { localized } from 'mailspring-exports';
 import { ViewBridge } from './view-bridge';
 import { registerHost } from './authoring/hosts';
 import { ViewDiagnostics, isFailure, reportFromGuest } from './authoring/diagnostics';
-import {
-  ApiCompatibility,
-  CURRENT_API_VERSION,
-  compatibility,
-} from './api-version';
+import { ApiCompatibility, CURRENT_API_VERSION, compatibility } from './api-version';
 import { ViewRegistryEvents, ViewsChange, allViews } from './view-registry';
 import {
   CONSENTED_PERMISSIONS,

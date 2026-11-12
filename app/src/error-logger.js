@@ -1,18 +1,7 @@
-var ErrorLogger, _, app;
+var ErrorLogger;
 
-let ipcRenderer = null;
-if (process.type === 'renderer') {
-  ipcRenderer = require('electron').ipcRenderer;
-  app = require('@electron/remote').app;
-} else {
-  app = require('electron').app;
-}
-
-var appVersion = app.getVersion();
-var SentryErrorReporter = require('./error-logger-extensions/sentry-error-reporter');
-
-// A globally available ErrorLogger that can report errors to various
-// sources and enhance error functionality.
+// A globally available ErrorLogger that logs errors locally and enhances error
+// functionality. Nothing is sent to remote reporting services.
 //
 // This runs in both the backend browser process and each and every
 // renderer process.
@@ -23,9 +12,6 @@ var SentryErrorReporter = require('./error-logger-extensions/sentry-error-report
 // It is available at `AppEnv.errorLogger` in each renderer process.
 // You should almost always use `AppEnv.reportError` in the renderer
 // processes instead of manually accessing the `errorLogger`
-//
-// The errorLogger will report errors to a log file as well as to 3rd
-// party reporting services if enabled.
 module.exports = ErrorLogger = (function () {
   function ErrorLogger(args) {
     this.reportError = this.reportError.bind(this);
@@ -33,23 +19,9 @@ module.exports = ErrorLogger = (function () {
     this.inDevMode = args.inDevMode;
     this.resourcePath = args.resourcePath;
 
-    this._startCrashReporter();
-
     this._extendErrorObject();
 
     this._extendNativeConsole();
-
-    this.extensions = [
-      new SentryErrorReporter({
-        inSpecMode: args.inSpecMode,
-        inDevMode: args.inDevMode,
-        resourcePath: args.resourcePath,
-      }),
-    ];
-
-    if (this.inSpecMode) {
-      return;
-    }
   }
 
   /////////////////////////////////////////////////////////////////////
@@ -57,89 +29,6 @@ module.exports = ErrorLogger = (function () {
   /////////////////////////////////////////////////////////////////////
 
   ErrorLogger.prototype.reportError = function (error, extra = {}) {
-    if (this.inSpecMode) {
-      return;
-    }
-    // An error reported without a stack shows up in Sentry attributed to
-    // wherever `new Error()` happened to run to give it one — for JSON
-    // reparsed in the main process's `report-error` IPC handler (see
-    // application.ts), that's the same IPC handler frame for every caller,
-    // regardless of the error's real origin (window.onerror, uncaughtException,
-    // unhandledrejection forwarding a bare rejection reason, or an explicit
-    // reportError() call). Every stackless error, whatever its message,
-    // collapses into one unactionable Sentry issue. Wrap such inputs in a
-    // real Error *here*, in the renderer, before the IPC hop: since callers
-    // differ, this call site's stack differs too, so Sentry attributes and
-    // groups them separately going forward. Keep the original message when
-    // there is one — only the stack is synthetic.
-    var hasMessage =
-      error && typeof error.message === 'string' && error.message.length > 0;
-    var hasStack = error && typeof error.stack === 'string' && error.stack.length > 0;
-    if (!hasStack) {
-      var message;
-      if (hasMessage) {
-        message = error.message;
-      } else {
-        var description;
-        try {
-          description = JSON.stringify(error);
-        } catch (e) {
-          description = Object.prototype.toString.call(error);
-        }
-        message = 'Empty error reported (' + description + ')';
-      }
-      var wrapped = new Error(message);
-      if (error && typeof error === 'object') {
-        // Copy any other useful fields from the original, but never let a
-        // missing `stack` (or, when we just fell back to the description
-        // above, an empty `message`) on the input clobber the wrap's real
-        // values — that would defeat the whole purpose of wrapping.
-        try {
-          var keys = Object.getOwnPropertyNames(error);
-          for (var i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            if (key === 'message' || key === 'stack') continue;
-            wrapped[key] = error[key];
-          }
-        } catch (e) {
-          // ignore non-assignable inputs
-        }
-      }
-      error = wrapped;
-    }
-    if (process.type === 'renderer') {
-      var errorJSON = '{}';
-      try {
-        errorJSON = JSON.stringify(error);
-      } catch (err) {
-        var recoveredError = new Error();
-        recoveredError.stack = error.stack;
-        recoveredError.message = `Recovered Error: ${error.message}`;
-        errorJSON = JSON.stringify(recoveredError);
-      }
-
-      var extraJSON;
-      try {
-        extraJSON = JSON.stringify(extra);
-      } catch (err) {
-        extraJSON = '{}';
-      }
-
-      /**
-       * We synchronously send all errors to the backend main process.
-       *
-       * This is important because errors can frequently happen right
-       * before a renderer window is closing. Since error reporting hits
-       * APIs and is asynchronous it's possible for the window to be
-       * destroyed before the report makes it.
-       *
-       * This is a rare use of `sendSync` to ensure the command has made
-       * it before the window closes.
-       */
-      ipcRenderer.sendSync('report-error', { errorJSON: errorJSON, extra: extraJSON });
-    } else {
-      this._notifyExtensions('reportError', error, extra);
-    }
     // console.error can itself throw (eg. EPIPE writing to a closed
     // stdout/stderr pipe on Linux). Since reportError is called from our
     // top-level uncaughtException handler, an uncaught throw here would
@@ -154,23 +43,6 @@ module.exports = ErrorLogger = (function () {
   /////////////////////////////////////////////////////////////////////
   ////////////////////////// PRIVATE METHODS //////////////////////////
   /////////////////////////////////////////////////////////////////////
-
-  ErrorLogger.prototype._startCrashReporter = function (args) {
-    if (process.type === 'renderer') {
-      return;
-    }
-    require('electron').crashReporter.start({
-      productName: 'Mailspring',
-      companyName: 'Mailspring',
-      submitURL: `https://id.getmailspring.com/report-crash?ver=${appVersion}&platform=${process.platform}`,
-      uploadToServer: true,
-      autoSubmit: true,
-      extra: {
-        ver: appVersion,
-        platform: process.platform,
-      },
-    });
-  };
 
   ErrorLogger.prototype._extendNativeConsole = function (args) {
     console.debug = this._consoleDebug.bind(this);
@@ -192,16 +64,6 @@ module.exports = ErrorLogger = (function () {
       },
       configurable: true,
     });
-  };
-
-  ErrorLogger.prototype._notifyExtensions = function () {
-    var command, args;
-    command = arguments[0];
-    args = 2 <= arguments.length ? Array.prototype.slice.call(arguments, 1) : [];
-    for (var i = 0; i < this.extensions.length; i++) {
-      const extension = this.extensions[i];
-      extension[command].apply(extension, args);
-    }
   };
 
   // Create a new console.debug option, which takes `true` (print)
